@@ -1,0 +1,24 @@
+import { Intercom } from './index.js'; // The core Intercom class
+
+const TARGET_TICKER = 'TNK'; // The asset we want to watch
+const MIN_LIQUIDITY = 100;    // Only alert for swaps over 100 units
+
+async function runVibeBot() {
+    const agent = new Intercom();
+    await agent.ready();
+
+    console.log(`Vibe Bot is live! Monitoring swaps for ${TARGET_TICKER}...`);
+
+    // Listen for peer-to-peer swap signals on the sidechannel
+    agent.on('sidechannel:message', (msg) => {
+        if (msg.type === 'swap_signal' && msg.ticker === TARGET_TICKER) {
+            if (msg.amount >= MIN_LIQUIDITY) {
+                console.log(`ALERT: Large ${TARGET_TICKER} Swap Detected!`);
+                console.log(`Amount: ${msg.amount} | Price: ${msg.price} Trac`);
+                console.log(`Peer: ${msg.peerId}`);
+            }
+        }
+    });
+}
+
+runVibeBot().catch(console.error);
